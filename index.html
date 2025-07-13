@@ -370,6 +370,14 @@
 
         const colorPicker = document.getElementById("colorPicker");
         colorPicker.addEventListener("input", () => {
+          handleCustomColorSelection();
+        });
+
+        colorPicker.addEventListener("click", () => {
+          handleCustomColorSelection();
+        });
+
+        function handleCustomColorSelection() {
           selectedSolidObjectColor = colorPicker.value;
           selectedToken = null;
 
@@ -382,7 +390,7 @@
           customDiv.style.backgroundColor = selectedSolidObjectColor;
           customDiv.className = "w-10 h-10 rounded border shadow";
           selectedInfo.appendChild(customDiv);
-        });
+        }
       }
 
       function generatePlayers() {
