@@ -330,15 +330,6 @@
           selectedSolidObjectColor = null;
           selectedPassableObjectColor = null;
 
-          clearAllSelections();
-
-          token.classList.add(
-            "ring",
-            "ring-2",
-            "ring-yellow-400",
-            "selected-token"
-          );
-
           selectedInfo.innerHTML = "";
           selectedInfo.appendChild(selectedToken.cloneNode(true));
           selectedSquare = null;
@@ -371,8 +362,6 @@
           solidObject.className = `w-10 h-10 ${colorClass} cursor-pointer rounded shadow border-2 border-transparent`;
 
           solidObject.addEventListener("click", () => {
-            clearAllSelections();
-            solidObject.classList.add("ring", "ring-2", "ring-yellow-400");
             selectedSolidObjectColor = colorClass;
             selectedPassableObjectColor = null;
             selectedToken = null;
@@ -389,7 +378,6 @@
         colorPicker.addEventListener("click", handleCustomSolidColorSelection);
 
         function handleCustomSolidColorSelection() {
-          clearAllSelections();
           selectedSolidObjectColor = colorPicker.value;
           selectedPassableObjectColor = null;
           selectedToken = null;
@@ -413,8 +401,6 @@
           passableObject.className = `w-10 h-10 ${colorClass} cursor-pointer rounded shadow border-2 border-transparent`;
 
           passableObject.addEventListener("click", () => {
-            clearAllSelections();
-            passableObject.classList.add("ring", "ring-2", "ring-yellow-400");
             selectedPassableObjectColor = colorClass;
             selectedSolidObjectColor = null;
             selectedToken = null;
@@ -439,7 +425,6 @@
         );
 
         function handleCustomPassableColorSelection() {
-          clearAllSelections();
           selectedPassableObjectColor = passableColorPicker.value;
           selectedSolidObjectColor = null;
           selectedToken = null;
@@ -450,24 +435,6 @@
           customDiv.className = "w-10 h-10 rounded border shadow";
           selectedInfo.appendChild(customDiv);
         }
-      }
-
-      function clearAllSelections() {
-        document
-          .querySelectorAll(
-            "#solidObjectPalette div, #passableObjectPalette div"
-          )
-          .forEach((el) => {
-            el.classList.remove("ring", "ring-2", "ring-yellow-400");
-          });
-        document.querySelectorAll(".selected-token").forEach((el) => {
-          el.classList.remove(
-            "ring",
-            "ring-2",
-            "ring-yellow-400",
-            "selected-token"
-          );
-        });
       }
 
       function generatePlayers(existingNames = {}) {
@@ -595,10 +562,17 @@
       }
 
       function eraseSquare(square) {
-        square.innerHTML = "";
-        if (square.firstElementChild) {
-          square.firstElementChild.removeAttribute("style");
+        const token = square.querySelector(".token");
+        const passableObject = square.querySelector(".passable-object");
+
+        if (token && passableObject) {
+          token.remove();
+          square.removeAttribute("style");
+          return;
         }
+
+        square.innerHTML = "";
+        square.removeAttribute("style");
         delete square.dataset.type;
 
         if (selectedSquare === square) {
