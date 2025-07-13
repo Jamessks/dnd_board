@@ -277,8 +277,8 @@
       let selectedSquare = null;
       let duplicateMode = false;
 
-      function toggleDuplicateMode() {
-        duplicateMode = !duplicateMode;
+      function setDuplicateMode(state) {
+        duplicateMode = state;
         const btn = document.getElementById("duplicateToggle");
         btn.textContent = `Duplicate Mode: ${duplicateMode ? "On" : "Off"}`;
         btn.classList.toggle("bg-yellow-500", duplicateMode);
@@ -393,14 +393,13 @@
         }
       }
 
-      function generatePlayers() {
+      function generatePlayers(existingNames = {}) {
         const count = parseInt(playerCountInput.value, 10);
         if (isNaN(count) || count < 1) {
           alert("Please enter a valid number of players.");
           return;
         }
 
-        const existingNames = getAllTokenNames();
         playerButtons.innerHTML = "";
         playerTokens = [];
 
@@ -429,14 +428,13 @@
         display.textContent = value;
       }
 
-      function generateEnemies() {
+      function generateEnemies(existingNames = {}) {
         const count = parseInt(enemyCountInput.value, 10);
         if (isNaN(count) || count < 1) {
           alert("Please enter a valid number of enemies.");
           return;
         }
 
-        const existingNames = getAllTokenNames();
         enemyButtons.innerHTML = "";
         enemyTokens = [];
 
@@ -539,6 +537,10 @@
           selectedInfo.innerHTML = "";
           selectedSquare = null;
         }
+      }
+
+      function toggleDuplicateMode() {
+        setDuplicateMode(!duplicateMode);
       }
 
       function applySelectionToSquare(square, event) {
@@ -651,7 +653,7 @@
         const rows = parseInt(document.getElementById("gridRows").value, 10);
         const cols = parseInt(document.getElementById("gridCols").value, 10);
         const tiles = grid.querySelectorAll("#grid > div");
-
+        const tokenNames = getAllTokenNames();
         const gridData = Array.from(tiles).map((square) => ({
           coord: square.getAttribute("data-coord"),
           innerHTML: square.innerHTML,
@@ -665,6 +667,7 @@
           enemyCount: parseInt(enemyCountInput.value),
           duplicateMode,
           gridData,
+          tokenNames,
         };
 
         const dataStr =
@@ -706,11 +709,14 @@
         document.getElementById("enemyCountDisplay").textContent =
           data.enemyCount;
         syncPlayerEnemyDisplays();
-        duplicateMode = data.duplicateMode;
+        setDuplicateMode(data.duplicateMode);
 
-        toggleDuplicateMode();
-        generatePlayers();
-        generateEnemies();
+        const btn = document.getElementById("duplicateToggle");
+        btn.textContent = `Duplicate Mode: ${duplicateMode ? "On" : "Off"}`;
+        btn.classList.toggle("bg-yellow-500", duplicateMode);
+        btn.classList.toggle("bg-blue-600", !duplicateMode);
+        generatePlayers(data.tokenNames || {});
+        generateEnemies(data.tokenNames || {});
         setupGrid(data.rows, data.cols);
 
         setTimeout(() => {
