@@ -9,6 +9,15 @@
       .bg-opacity-80 {
         background-color: rgba(250, 255, 240, 0.4);
       }
+      .token-on-passable {
+        width: 2rem !important;
+        height: 2rem !important;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+      }
     </style>
   </head>
   <body
@@ -144,8 +153,21 @@
         <div class="bg-yellow-500/30 p-4">
           <h2 class="text-lg font-bold mb-2">Passable Objects</h2>
           <div class="flex items-center gap-2">
-            <span>TBA</span>
-            <div id="solidObjectPalette" class="flex gap-2"></div>
+            <div id="passableObjectPalette" class="flex gap-2"></div>
+            <div class="relative inline-block w-10 h-10">
+              <input
+                type="color"
+                id="passableColorPicker"
+                value="#00aaff"
+                class="w-10 h-10 border rounded cursor-pointer appearance-none"
+                title="Pick passable color"
+              />
+              <span
+                class="absolute inset-0 flex items-center justify-center text-white font-bold pointer-events-none"
+              >
+                P
+              </span>
+            </div>
           </div>
         </div>
         <!-- Grid Settings Section -->
@@ -270,7 +292,15 @@
         "bg-purple-700",
         "bg-orange-700",
       ];
+      const passableObjectColors = [
+        "bg-blue-400",
+        "bg-cyan-400",
+        "bg-emerald-400",
+        "bg-amber-400",
+        "bg-rose-400",
+      ];
       let selectedSolidObjectColor = null;
+      let selectedPassableObjectColor = null;
       let selectedToken = null;
       let playerTokens = [];
       let enemyTokens = [];
@@ -298,19 +328,9 @@
         token.addEventListener("click", () => {
           selectedToken = token.cloneNode(true);
           selectedSolidObjectColor = null;
+          selectedPassableObjectColor = null;
 
-          document.querySelectorAll(".selected-token").forEach((el) => {
-            el.classList.remove(
-              "ring",
-              "ring-2",
-              "ring-yellow-400",
-              "selected-token"
-            );
-          });
-
-          document.querySelectorAll("#solidObjectPalette div").forEach((el) => {
-            el.classList.remove("ring", "ring-2", "ring-yellow-400");
-          });
+          clearAllSelections();
 
           token.classList.add(
             "ring",
@@ -351,14 +371,10 @@
           solidObject.className = `w-10 h-10 ${colorClass} cursor-pointer rounded shadow border-2 border-transparent`;
 
           solidObject.addEventListener("click", () => {
-            document
-              .querySelectorAll("#solidObjectPalette div")
-              .forEach((el) => {
-                el.classList.remove("ring", "ring-2", "ring-yellow-400");
-              });
-
+            clearAllSelections();
             solidObject.classList.add("ring", "ring-2", "ring-yellow-400");
             selectedSolidObjectColor = colorClass;
+            selectedPassableObjectColor = null;
             selectedToken = null;
 
             selectedInfo.innerHTML = "";
@@ -369,21 +385,14 @@
         });
 
         const colorPicker = document.getElementById("colorPicker");
-        colorPicker.addEventListener("input", () => {
-          handleCustomColorSelection();
-        });
+        colorPicker.addEventListener("input", handleCustomSolidColorSelection);
+        colorPicker.addEventListener("click", handleCustomSolidColorSelection);
 
-        colorPicker.addEventListener("click", () => {
-          handleCustomColorSelection();
-        });
-
-        function handleCustomColorSelection() {
+        function handleCustomSolidColorSelection() {
+          clearAllSelections();
           selectedSolidObjectColor = colorPicker.value;
+          selectedPassableObjectColor = null;
           selectedToken = null;
-
-          document.querySelectorAll("#solidObjectPalette div").forEach((el) => {
-            el.classList.remove("ring", "ring-2", "ring-yellow-400");
-          });
 
           selectedInfo.innerHTML = "";
           const customDiv = document.createElement("div");
@@ -393,6 +402,74 @@
         }
       }
 
+      function generatePassableObjectPalette() {
+        const passableObjectPalette = document.getElementById(
+          "passableObjectPalette"
+        );
+        passableObjectPalette.innerHTML = "";
+
+        passableObjectColors.forEach((colorClass, index) => {
+          const passableObject = document.createElement("div");
+          passableObject.className = `w-10 h-10 ${colorClass} cursor-pointer rounded shadow border-2 border-transparent`;
+
+          passableObject.addEventListener("click", () => {
+            clearAllSelections();
+            passableObject.classList.add("ring", "ring-2", "ring-yellow-400");
+            selectedPassableObjectColor = colorClass;
+            selectedSolidObjectColor = null;
+            selectedToken = null;
+
+            selectedInfo.innerHTML = "";
+            selectedInfo.appendChild(passableObject.cloneNode(true));
+          });
+
+          passableObjectPalette.appendChild(passableObject);
+        });
+
+        const passableColorPicker = document.getElementById(
+          "passableColorPicker"
+        );
+        passableColorPicker.addEventListener(
+          "input",
+          handleCustomPassableColorSelection
+        );
+        passableColorPicker.addEventListener(
+          "click",
+          handleCustomPassableColorSelection
+        );
+
+        function handleCustomPassableColorSelection() {
+          clearAllSelections();
+          selectedPassableObjectColor = passableColorPicker.value;
+          selectedSolidObjectColor = null;
+          selectedToken = null;
+
+          selectedInfo.innerHTML = "";
+          const customDiv = document.createElement("div");
+          customDiv.style.backgroundColor = selectedPassableObjectColor;
+          customDiv.className = "w-10 h-10 rounded border shadow";
+          selectedInfo.appendChild(customDiv);
+        }
+      }
+
+      function clearAllSelections() {
+        document
+          .querySelectorAll(
+            "#solidObjectPalette div, #passableObjectPalette div"
+          )
+          .forEach((el) => {
+            el.classList.remove("ring", "ring-2", "ring-yellow-400");
+          });
+        document.querySelectorAll(".selected-token").forEach((el) => {
+          el.classList.remove(
+            "ring",
+            "ring-2",
+            "ring-yellow-400",
+            "selected-token"
+          );
+        });
+      }
+
       function generatePlayers(existingNames = {}) {
         const count = parseInt(playerCountInput.value, 10);
         if (isNaN(count) || count < 1) {
@@ -400,6 +477,20 @@
           return;
         }
 
+        for (let i = count + 1; i <= 20; i++) {
+          const tokenText = `P${i}`;
+          grid.querySelectorAll("div").forEach((sq) => {
+            const token = sq.querySelector(".token");
+            if (token && token.textContent === tokenText) {
+              token.remove();
+              if (!sq.querySelector(".passable-object")) {
+                delete sq.dataset.type;
+              }
+            }
+          });
+        }
+
+        const currentNames = getAllTokenNames();
         playerButtons.innerHTML = "";
         playerTokens = [];
 
@@ -409,7 +500,7 @@
             label,
             "player",
             i,
-            existingNames
+            Object.keys(existingNames).length > 0 ? existingNames : currentNames
           );
           playerButtons.appendChild(container);
           playerTokens.push(token);
@@ -435,6 +526,20 @@
           return;
         }
 
+        for (let i = count + 1; i <= 20; i++) {
+          const tokenText = `E${i}`;
+          grid.querySelectorAll("div").forEach((sq) => {
+            const token = sq.querySelector(".token");
+            if (token && token.textContent === tokenText) {
+              token.remove();
+              if (!sq.querySelector(".passable-object")) {
+                delete sq.dataset.type;
+              }
+            }
+          });
+        }
+
+        const currentNames = getAllTokenNames();
         enemyButtons.innerHTML = "";
         enemyTokens = [];
 
@@ -444,7 +549,7 @@
             label,
             "enemy",
             i,
-            existingNames
+            Object.keys(existingNames).length > 0 ? existingNames : currentNames
           );
           enemyButtons.appendChild(container);
           enemyTokens.push(token);
@@ -464,44 +569,7 @@
             square.setAttribute("data-coord", `${row}-${col}`);
 
             square.addEventListener("click", (event) => {
-              const isShiftHeld = event.shiftKey;
-              const allowDuplicate = isShiftHeld || duplicateMode;
-
-              if (selectedSolidObjectColor) {
-                if (square.dataset.type === "solidObject") return;
-                square.innerHTML = "";
-                const obj = document.createElement("div");
-                obj.className = "w-10 h-10 rounded";
-
-                if (selectedSolidObjectColor.startsWith("#")) {
-                  obj.style.backgroundColor = selectedSolidObjectColor;
-                } else {
-                  obj.classList.add(selectedSolidObjectColor);
-                }
-
-                square.appendChild(obj);
-                square.dataset.type = "solidObject";
-              } else if (selectedToken) {
-                if (square.dataset.type === "solidObject") return;
-
-                if (!allowDuplicate) {
-                  grid.querySelectorAll("div").forEach((sq) => {
-                    if (
-                      sq.firstElementChild &&
-                      sq.firstElementChild.textContent ===
-                        selectedToken.textContent
-                    ) {
-                      sq.innerHTML = "";
-                      delete sq.dataset.type;
-                    }
-                  });
-                }
-
-                square.innerHTML = "";
-                square.appendChild(selectedToken.cloneNode(true));
-                square.dataset.type = "token";
-                updateSelectedInfo(square);
-              }
+              applySelectionToSquare(square, event);
             });
 
             square.addEventListener("mouseenter", (event) => {
@@ -561,24 +629,60 @@
 
           square.appendChild(obj);
           square.dataset.type = "solidObject";
+        } else if (selectedPassableObjectColor) {
+          if (square.dataset.type === "solidObject") return;
+
+          const existingToken = square.querySelector(".token");
+          if (existingToken) existingToken.remove();
+
+          const existingPassable = square.querySelector(".passable-object");
+          if (existingPassable) existingPassable.remove();
+
+          const obj = document.createElement("div");
+          obj.className = "w-10 h-10 rounded passable-object";
+
+          if (selectedPassableObjectColor.startsWith("#")) {
+            obj.style.backgroundColor = selectedPassableObjectColor;
+          } else {
+            obj.classList.add(selectedPassableObjectColor);
+          }
+
+          square.appendChild(obj);
+          square.dataset.type = "passableObject";
         } else if (selectedToken) {
           if (square.dataset.type === "solidObject") return;
 
           if (!allowDuplicate) {
             grid.querySelectorAll("div").forEach((sq) => {
+              const existingToken = sq.querySelector(".token");
               if (
-                sq.firstElementChild &&
-                sq.firstElementChild.textContent === selectedToken.textContent
+                existingToken &&
+                existingToken.textContent === selectedToken.textContent
               ) {
-                sq.innerHTML = "";
-                delete sq.dataset.type;
+                existingToken.remove();
+                if (!sq.querySelector(".passable-object")) {
+                  delete sq.dataset.type;
+                }
               }
             });
           }
 
-          square.innerHTML = "";
-          square.appendChild(selectedToken.cloneNode(true));
-          square.dataset.type = "token";
+          const existingToken = square.querySelector(".token");
+          if (existingToken) existingToken.remove();
+
+          const token = selectedToken.cloneNode(true);
+          token.classList.add("token");
+
+          if (square.dataset.type === "passableObject") {
+            token.classList.add("token-on-passable");
+            square.style.position = "relative";
+          }
+
+          square.appendChild(token);
+
+          if (square.dataset.type !== "passableObject") {
+            square.dataset.type = "token";
+          }
           updateSelectedInfo(square);
         }
       }
@@ -643,6 +747,7 @@
       generatePlayers();
       generateEnemies();
       generateSolidObjectPalette();
+      generatePassableObjectPalette();
       syncGridControls();
       syncPlayerEnemyDisplays();
 
@@ -658,6 +763,7 @@
           coord: square.getAttribute("data-coord"),
           innerHTML: square.innerHTML,
           type: square.dataset.type || null,
+          style: square.getAttribute("style") || null,
         }));
 
         const boardState = {
@@ -734,6 +840,11 @@
                 targetSquare.dataset.type = tile.type;
               } else {
                 delete targetSquare.dataset.type;
+              }
+              if (tile.style) {
+                targetSquare.setAttribute("style", tile.style);
+              } else {
+                targetSquare.removeAttribute("style");
               }
             }
           });
