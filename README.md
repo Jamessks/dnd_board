@@ -15,7 +15,7 @@ The user may:
 
 Sample Screenshot:
 
-![Screenshot](./images/example.png)
+![Screenshot](./images/example2.png)
 
 Usage instructions:
 
