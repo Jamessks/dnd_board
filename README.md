@@ -1,6 +1,8 @@
 # D&D Board Project
 
-A tool made mainly for DnD DMs. It allows them to visualize their fantastic map layout in an html page which they can share with others, preferably through a share screen functionality.
+A tool made mainly for DnD DMs. It allows them to visualize their fantastic map layout in an HTML page which they can share with others, preferably through a share screen functionality.
+
+It is to be re-written in Vue.js along with additional server-side interaction
 
 The user may:
 
