@@ -10,6 +10,10 @@ The user may:
 4. Create interesting map layouts by clicking or drawing on the map grid. Maps are made up of solid and passable objects such as walls, water, fire, floor tiles etc. represented by different colors (no textures yet)
 5. Save/Load a map's state through the use of JSON files
 
+Usage instructions:
+
+Download the project, open the index.html on the browser and voila, you have a D&D board
+
 This project was created for fun and personal use in tabletop sessions.
 
 Not for commercial use.  
