@@ -8,9 +8,10 @@ The user may:
 
 1. Adjust the number of Players and Enemies of the session
 2. Set distinguished names for identification purposes to each character present on the board
-3. Adjust the size of the map grid
-4. Create interesting map layouts by clicking or drawing on the map grid. Maps are made up of solid and passable objects such as walls, water, fire, floor tiles etc. represented by different colors (no textures yet)
-5. Save/Load a map's state through the use of JSON files
+3. Place said entities on the board
+4. Adjust the size of the map grid
+5. Create interesting map layouts by clicking or drawing on the map grid. Maps are made up of solid and passable objects such as walls, water, fire, floor tiles etc. represented by different colors (no textures yet)
+6. Save/Load a map's state through the use of JSON files
 
 Usage instructions:
 
