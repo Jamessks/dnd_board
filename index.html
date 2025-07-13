@@ -6,8 +6,10 @@
     <title>DnD Board</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Uncial+Antiqua&display=swap");
+
       .bg-opacity-80 {
-        background-color: rgba(250, 255, 240, 0.4);
+        background-color: rgba(139, 69, 19, 0.9);
       }
       .token-on-passable {
         width: 2rem !important;
@@ -18,26 +20,82 @@
         transform: translate(-50%, -50%);
         z-index: 10;
       }
+      .dnd-title {
+        font-family: "Uncial Antiqua", cursive;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        color: #d4af37;
+      }
+      .dnd-section {
+        background: linear-gradient(
+          135deg,
+          rgba(139, 69, 19, 0.9),
+          rgba(101, 67, 33, 0.9)
+        );
+        border: 2px solid #8b4513;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+      .dnd-button {
+        background: linear-gradient(135deg, #8b4513, #654321);
+        border: 1px solid #d4af37;
+        color: #f5deb3;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        transition: all 0.3s ease;
+      }
+      .dnd-button:hover {
+        background: linear-gradient(135deg, #a0522d, #8b4513);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+      }
+      .dnd-grid {
+        background: linear-gradient(45deg, #2f2f2f, #1a1a1a);
+        border: 3px solid #8b4513;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      }
+      .dnd-square {
+        border: 1px solid #444;
+        background: #f5f5dc;
+        transition: all 0.2s ease;
+      }
+      .dnd-square:hover {
+        background: #e6e6fa;
+        box-shadow: inset 0 0 5px rgba(212, 175, 55, 0.3);
+      }
+      .dnd-text {
+        font-family: "Cinzel", serif;
+        color: #f5deb3;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+      }
+      body {
+        font-family: "Cinzel", serif;
+      }
     </style>
   </head>
   <body
-    class="bg-gray-100 min-h-screen pt-4 flex flex-col justify-between space-y-6 items-center"
+    class="min-h-screen pt-4 flex flex-col justify-between space-y-6 items-center"
     style="
-      background-image: url('images/dnd_bg.jpg');
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
+      background: linear-gradient(
+        135deg,
+        #1a1a1a 0%,
+        #2d1b0e 50%,
+        #1a1a1a 100%
+      );
+      background-attachment: fixed;
     "
   >
+    <!-- Title -->
+    <h1 class="dnd-title text-4xl font-bold mb-6">
+      ⚔️ Dungeon Master's Board ⚔️
+    </h1>
+
     <div class="flex w-full max-w-7xl gap-6 items-start">
       <!-- Sidebar -->
       <div
         id="sidebar"
-        class="w-100 bg-white/80 rounded-lg shadow p-4 space-y-6 transition-all duration-300"
+        class="w-100 bg-opacity-80 rounded-lg shadow-2xl p-4 space-y-6 transition-all duration-300 border-2 border-yellow-600"
       >
         <!-- Players Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Players</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">⚔️ Heroes</h2>
           <div class="flex items-center gap-2 justify-start">
             <div class="flex items-center bg-white border rounded shadow-sm">
               <button
@@ -62,13 +120,13 @@
             </div>
             <button
               onclick="generatePlayers()"
-              class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+              class="dnd-button px-3 py-1 rounded"
             >
-              Generate
+              Summon Heroes
             </button>
             <button
               id="duplicateToggle"
-              class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+              class="dnd-button px-3 py-1 rounded"
               onclick="toggleDuplicateMode()"
             >
               Duplicate Mode: Off
@@ -82,8 +140,8 @@
         </div>
 
         <!-- Enemies Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Enemies</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">💀 Monsters</h2>
           <div class="flex items-center gap-2 justify-start">
             <div class="flex items-center bg-white border rounded shadow-sm">
               <button
@@ -108,9 +166,9 @@
             </div>
             <button
               onclick="generateEnemies()"
-              class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+              class="dnd-button px-3 py-1 rounded"
             >
-              Generate
+              Spawn Monsters
             </button>
           </div>
           <input type="hidden" id="enemyCount" value="2" />
@@ -121,16 +179,16 @@
         </div>
 
         <!-- Current Selection Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Current Selection</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">🎯 Selected</h2>
           <div
             id="selectedInfo"
-            class="font-semibold text-lg flex justify-center items-center h-12 w-12 border rounded bg-white/80"
+            class="font-semibold text-lg flex justify-center items-center h-12 w-12 border-2 border-yellow-600 rounded bg-black/50"
           ></div>
         </div>
         <!-- Solid Objects Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Solid Objects</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">🏰 Walls & Obstacles</h2>
           <div class="flex items-center gap-2">
             <div id="solidObjectPalette" class="flex gap-2"></div>
             <div class="relative inline-block w-10 h-10">
@@ -150,8 +208,8 @@
           </div>
         </div>
         <!-- Passable Objects Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Passable Objects</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">🌊 Terrain</h2>
           <div class="flex items-center gap-2">
             <div id="passableObjectPalette" class="flex gap-2"></div>
             <div class="relative inline-block w-10 h-10">
@@ -171,8 +229,8 @@
           </div>
         </div>
         <!-- Grid Settings Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Grid Settings</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">📐 Battlefield Size</h2>
           <div class="flex items-center gap-2 flex-wrap">
             <!-- Rows Control -->
             <div class="flex items-center bg-white border rounded shadow-sm">
@@ -222,9 +280,9 @@
 
             <button
               onclick="generateGrid()"
-              class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+              class="dnd-button px-3 py-1 rounded"
             >
-              Regenerate Grid
+              Reshape Battlefield
             </button>
           </div>
 
@@ -233,31 +291,30 @@
 
           <button
             onclick="clearGrid()"
-            class="bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-900 transition mt-4"
+            class="dnd-button px-6 py-2 rounded mt-4"
           >
-            Clear Grid
+            🔥 Clear Battlefield
           </button>
         </div>
         <!-- Save/Load Section -->
-        <div class="bg-yellow-500/30 p-4">
-          <h2 class="text-lg font-bold mb-2">Save/Load</h2>
+        <div class="dnd-section rounded-lg p-4">
+          <h2 class="dnd-text text-xl font-bold mb-3">📜 Campaign</h2>
           <div class="flex items-center gap-2">
             <button
               onclick="saveBoardState()"
-              class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition mt-2"
+              class="dnd-button px-6 py-2 rounded mt-2"
             >
-              Save
+              📝 Save Quest
             </button>
 
             <input type="file" id="importJson" class="hidden" accept=".json" />
 
-            <label
-              for="importJson"
-              class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded cursor-pointer transition mt-2 inline-flex items-center justify-center"
-              style="height: 2.5rem"
+            <button
+              onclick="document.getElementById('importJson').click()"
+              class="dnd-button px-6 py-2 rounded mt-2"
             >
-              Load
-            </label>
+              📖 Load Quest
+            </button>
 
             <div id="solidObjectPalette" class="flex gap-2"></div>
           </div>
@@ -265,15 +322,19 @@
       </div>
 
       <!-- Main Grid Column -->
-      <div class="flex flex-col items-center space-y-4 shadow-md">
+      <div class="flex flex-col items-center space-y-4">
         <div
           id="grid"
-          class="grid grid-cols-20 w-max mx-auto bg-gray-200 p-4 rounded-lg shadow-md"
+          class="dnd-grid grid grid-cols-20 w-max mx-auto p-6 rounded-lg"
         ></div>
       </div>
     </div>
-    <footer class="w-full text-center py-4 bg-white/80 mt-6 rounded shadow">
-      <p class="text-sm text-gray-700">&copy; DS 2025</p>
+    <footer
+      class="w-full text-center py-4 bg-opacity-80 mt-6 rounded shadow border-t-2 border-yellow-600"
+    >
+      <p class="dnd-text text-sm">
+        &copy; JamesSks 2025 - May your dice roll high! 🎲
+      </p>
     </footer>
     <script>
       const playerCountInput = document.getElementById("playerCount");
@@ -309,8 +370,8 @@
         duplicateMode = state;
         const btn = document.getElementById("duplicateToggle");
         btn.textContent = `Duplicate Mode: ${duplicateMode ? "On" : "Off"}`;
-        btn.classList.toggle("bg-yellow-500", duplicateMode);
-        btn.classList.toggle("bg-blue-600", !duplicateMode);
+        btn.classList.toggle("bg-yellow-700", duplicateMode);
+        btn.classList.toggle("bg-opacity-80", !duplicateMode);
       }
 
       function createTokenButton(label, team, index, existingNames = {}) {
@@ -318,8 +379,10 @@
         wrapper.className = "flex items-center gap-2 mb-2";
 
         const token = document.createElement("div");
-        token.className = `w-10 h-10 flex items-center justify-center text-white font-bold cursor-pointer rounded-sm ${
-          team === "player" ? "bg-blue-600" : "bg-red-600"
+        token.className = `w-10 h-10 flex items-center justify-center text-white font-bold cursor-pointer rounded-sm border-2 ${
+          team === "player"
+            ? "bg-blue-800 border-blue-400"
+            : "bg-red-800 border-red-400"
         }`;
         token.textContent = label;
 
@@ -529,7 +592,7 @@
           for (let col = 0; col < cols; col++) {
             const square = document.createElement("div");
             square.className =
-              "w-10 h-10 bg-white border border-gray-600 flex items-center justify-center hover:bg-gray-300 transition-colors duration-50 cursor-pointer select-none";
+              "dnd-square w-10 h-10 flex items-center justify-center cursor-pointer select-none";
 
             square.setAttribute("data-coord", `${row}-${col}`);
 
