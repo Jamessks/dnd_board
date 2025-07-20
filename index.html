@@ -323,6 +323,14 @@
 
       <!-- Main Grid Column -->
       <div class="flex flex-col items-center space-y-4">
+        <!-- Initiative Tracker Bar -->
+        <div id="initiativeTrackerContainer" class="w-full hidden">
+          <div class="dnd-section rounded-lg p-3 mb-2">
+            <div id="initiativeTracker" class="flex items-center justify-center gap-2 min-h-[3rem] p-2 bg-black/30 rounded border border-yellow-600">
+              <!-- Initiative tokens will be displayed here -->
+            </div>
+          </div>
+        </div>
         <div
           id="grid"
           class="dnd-grid grid grid-cols-20 w-max mx-auto p-6 rounded-lg"
@@ -396,21 +404,38 @@
           selectedSquare = null;
         });
 
-        const input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = "Name";
-        input.className = "px-2 py-1 border rounded text-sm";
-        input.dataset.token = label;
-        input.value = existingNames[label] || "";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.placeholder = "Name";
+        nameInput.className = "px-2 py-1 border rounded text-base font-bold w-36 text-center";
+        nameInput.dataset.token = label;
+        nameInput.value = existingNames[label]?.name || "";
+        
+        const initiativeInput = document.createElement("input");
+        initiativeInput.type = "text";
+        initiativeInput.placeholder = "Init";
+        initiativeInput.className = "px-2 py-1 border rounded text-base font-bold w-16 ml-1 text-center";
+        initiativeInput.dataset.initiative = label;
+        initiativeInput.value = existingNames[label]?.initiative || "";
+        
+        const inputsDiv = document.createElement("div");
+        inputsDiv.className = "flex items-center";
+        inputsDiv.appendChild(nameInput);
+        inputsDiv.appendChild(initiativeInput);
 
         wrapper.appendChild(token);
-        wrapper.appendChild(input);
+        wrapper.appendChild(inputsDiv);
         return { container: wrapper, token };
       }
       function getAllTokenNames() {
         const names = {};
-        document.querySelectorAll("input[data-token]").forEach((input) => {
-          names[input.dataset.token] = input.value;
+        document.querySelectorAll("input[data-token]").forEach((nameInput) => {
+          const token = nameInput.dataset.token;
+          const initiativeInput = document.querySelector(`input[data-initiative="${token}"]`);
+          names[token] = {
+            name: nameInput.value,
+            initiative: initiativeInput ? initiativeInput.value : ""
+          };
         });
         return names;
       }
@@ -536,6 +561,9 @@
 
         const firstBtn = playerButtons.querySelector("div div");
         if (firstBtn) firstBtn.click();
+        
+        // Update initiative order
+        updateInitiativeOrder();
       }
 
       function adjustCount(id, delta) {
@@ -582,6 +610,9 @@
           enemyButtons.appendChild(container);
           enemyTokens.push(token);
         }
+        
+        // Update initiative order
+        updateInitiativeOrder();
       }
 
       function setupGrid(rows = 20, cols = 20) {
@@ -883,6 +914,9 @@
               }
             }
           });
+          
+          // Update initiative order after loading
+          updateInitiativeOrder();
         }, 50);
       }
 
@@ -895,6 +929,79 @@
       document.addEventListener("mouseup", () => {
         isMouseDown = false;
       });
+      
+      function updateInitiativeOrder() {
+        const initiativeTracker = document.getElementById('initiativeTracker');
+        const initiativeTrackerContainer = document.getElementById('initiativeTrackerContainer');
+        initiativeTracker.innerHTML = '';
+        
+        // Get all token names and initiatives
+        const tokenData = getAllTokenNames();
+        
+        // Convert to array for sorting
+        const tokens = [];
+        for (const tokenId in tokenData) {
+          const data = tokenData[tokenId];
+          const initiative = parseInt(data.initiative, 10);
+          if (!isNaN(initiative)) {
+            tokens.push({
+              id: tokenId,
+              name: data.name || tokenId,
+              initiative: initiative,
+              isPlayer: tokenId.startsWith('P')
+            });
+          }
+        }
+        
+        // Show/hide the initiative tracker based on whether there are initiative values
+        if (tokens.length > 0) {
+          initiativeTrackerContainer.classList.remove('hidden');
+          
+          // Sort by initiative (highest first)
+          tokens.sort((a, b) => b.initiative - a.initiative);
+          
+          // Create tokens in the initiative bar
+          tokens.forEach(token => {
+            const tokenElement = document.createElement('div');
+            tokenElement.className = `w-12 h-12 flex flex-col items-center justify-center text-white font-bold rounded-sm border-2 ${
+              token.isPlayer ? "bg-blue-800 border-blue-400" : "bg-red-800 border-red-400"
+            }`;
+            
+            const tokenLabel = document.createElement('div');
+            tokenLabel.textContent = token.id;
+            tokenLabel.className = 'text-lg';
+            
+            const initiativeValue = document.createElement('div');
+            initiativeValue.textContent = token.initiative;
+            initiativeValue.className = 'text-xs';
+            
+            tokenElement.appendChild(tokenLabel);
+            tokenElement.appendChild(initiativeValue);
+            
+            // Add tooltip with character name
+            if (token.name && token.name !== token.id) {
+              tokenElement.title = token.name;
+            }
+            
+            initiativeTracker.appendChild(tokenElement);
+          });
+        } else {
+          // Hide the tracker if no initiatives are set
+          initiativeTrackerContainer.classList.add('hidden');
+        }
+      }
+      
+      // Update initiative order when initiative values change
+      document.addEventListener('input', function(e) {
+        if (e.target.dataset.initiative) {
+          // Debounce the update to avoid too many refreshes
+          clearTimeout(window.initiativeUpdateTimer);
+          window.initiativeUpdateTimer = setTimeout(updateInitiativeOrder, 500);
+        }
+      });
+      
+      // Initialize the initiative tracker
+      updateInitiativeOrder();
     </script>
   </body>
 </html>
