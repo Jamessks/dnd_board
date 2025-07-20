@@ -295,6 +295,13 @@
           >
             🔥 Clear Battlefield
           </button>
+          
+          <button
+            onclick="resetCharacters()"
+            class="dnd-button px-6 py-2 rounded mt-2"
+          >
+            🧹 Reset Characters
+          </button>
         </div>
         <!-- Save/Load Section -->
         <div class="dnd-section rounded-lg p-4">
@@ -999,6 +1006,20 @@
           window.initiativeUpdateTimer = setTimeout(updateInitiativeOrder, 500);
         }
       });
+      
+      function resetCharacters() {
+        // Clear all character names and initiative values
+        document.querySelectorAll('input[data-token]').forEach(nameInput => {
+          nameInput.value = '';
+        });
+        
+        document.querySelectorAll('input[data-initiative]').forEach(initiativeInput => {
+          initiativeInput.value = '';
+        });
+        
+        // Update initiative order to hide the tracker
+        updateInitiativeOrder();
+      }
       
       // Initialize the initiative tracker
       updateInitiativeOrder();
