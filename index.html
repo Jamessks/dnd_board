@@ -68,6 +68,50 @@
       body {
         font-family: "Cinzel", serif;
       }
+      
+      /* Custom D&D Tooltip */
+      .dnd-tooltip {
+        position: relative;
+        cursor: pointer;
+      }
+      
+      .dnd-tooltip .tooltip-text {
+        visibility: hidden;
+        position: absolute;
+        z-index: 100;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 120px;
+        background: linear-gradient(135deg, #8b4513, #654321);
+        color: #f5deb3;
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
+        border: 2px solid #d4af37;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        font-family: "Cinzel", serif;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      
+      .dnd-tooltip .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -8px;
+        border-width: 8px;
+        border-style: solid;
+        border-color: #d4af37 transparent transparent transparent;
+      }
+      
+      .dnd-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
     </style>
   </head>
   <body
@@ -726,12 +770,13 @@
           if (square.dataset.type === "solidObject") return;
 
           if (!allowDuplicate) {
-            grid.querySelectorAll("div").forEach((sq) => {
+            // Get all squares in the grid
+            const allSquares = Array.from(grid.querySelectorAll(".dnd-square"));
+            
+            // Find and remove any existing instances of this token
+            allSquares.forEach((sq) => {
               const existingToken = sq.querySelector(".token");
-              if (
-                existingToken &&
-                existingToken.textContent === selectedToken.textContent
-              ) {
+              if (existingToken && existingToken.dataset.tokenId === selectedToken.textContent) {
                 existingToken.remove();
                 if (!sq.querySelector(".passable-object")) {
                   delete sq.dataset.type;
@@ -745,6 +790,23 @@
 
           const token = selectedToken.cloneNode(true);
           token.classList.add("token");
+          
+          // Add token ID as data attribute for tooltip lookup
+          const tokenId = token.textContent;
+          token.dataset.tokenId = tokenId;
+          
+          // Get character name for tooltip
+          const tokenNames = getAllTokenNames();
+          const characterName = tokenNames[tokenId]?.name;
+          
+          // Add custom D&D tooltip
+          if (characterName) {
+            token.classList.add('dnd-tooltip');
+            const tooltipText = document.createElement('span');
+            tooltipText.className = 'tooltip-text';
+            tooltipText.textContent = characterName;
+            token.appendChild(tooltipText);
+          }
 
           if (square.dataset.type === "passableObject") {
             token.classList.add("token-on-passable");
@@ -998,12 +1060,40 @@
         }
       }
       
-      // Update initiative order when initiative values change
+      // Update tooltips for all tokens on the grid
+      function updateTokenTooltips() {
+        const tokenNames = getAllTokenNames();
+        grid.querySelectorAll('.token').forEach(token => {
+          const tokenId = token.dataset.tokenId;
+          if (tokenId && tokenNames[tokenId]?.name) {
+            // Remove any existing tooltip
+            const existingTooltip = token.querySelector('.tooltip-text');
+            if (existingTooltip) {
+              existingTooltip.remove();
+            }
+            
+            // Add custom D&D tooltip
+            token.classList.add('dnd-tooltip');
+            const tooltipText = document.createElement('span');
+            tooltipText.className = 'tooltip-text';
+            tooltipText.textContent = tokenNames[tokenId].name;
+            token.appendChild(tooltipText);
+          }
+        });
+      }
+      
+      // Update initiative order and tooltips when values change
       document.addEventListener('input', function(e) {
         if (e.target.dataset.initiative) {
           // Debounce the update to avoid too many refreshes
           clearTimeout(window.initiativeUpdateTimer);
           window.initiativeUpdateTimer = setTimeout(updateInitiativeOrder, 500);
+        }
+        
+        if (e.target.dataset.token) {
+          // Update tooltips when character names change
+          clearTimeout(window.tooltipUpdateTimer);
+          window.tooltipUpdateTimer = setTimeout(updateTokenTooltips, 500);
         }
       });
       
